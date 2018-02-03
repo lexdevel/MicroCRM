@@ -1,0 +1,37 @@
+{
+    "name": "micro-crm",
+    "private": true,
+    "version": "0.0.0",
+    "dependencies": {
+        "@angular/common": "^5.2.0",
+        "@angular/compiler": "^5.2.0",
+        "@angular/core": "^5.2.0",
+        "@angular/forms": "^5.2.0",
+        "@angular/platform-browser": "^5.2.0",
+        "@angular/platform-browser-dynamic": "^5.2.0",
+        "@angular/router": "^5.2.0",
+        
+        "core-js": "^2.5.3",
+        "zone.js": "^0.8.19",
+        "rxjs": "^5.5.6",
+
+        "jquery": "^3.3.1",
+        "popper.js": "^1.12.9",
+        "bootstrap": "^4.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^9.3.0",
+        "@types/webpack-env": "^1.13.3",
+        "typescript": "^2.6.2",
+        "webpack": "^3.10.0",
+        "webpack-hot-middleware": "^2.21.0",
+        "ts-loader": "^3.2.0",
+        "angular2-template-loader": "^0.6.2",
+        "to-string-loader": "^1.1.5",
+        "style-loader": "^0.19.1",
+        "css-loader": "^0.28.8",
+        "html-loader": "^0.5.4",
+        "aspnet-prerendering": "^3.0.1",
+        "aspnet-webpack": "^2.0.1"
+    }
+}

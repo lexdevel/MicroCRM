@@ -1,0 +1,10 @@
+.vscode
+.vs
+node_modules
+**/bin
+**/obj
+**/wwwroot/vendor
+**/wwwroot/dist
+*.csproj.user
+*.bundle.js
+*.DS_Store

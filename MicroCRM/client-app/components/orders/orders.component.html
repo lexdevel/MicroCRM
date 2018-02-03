@@ -1,0 +1,88 @@
+<div>
+    <h4>Orders</h4>
+    <div class="float-right">
+        <button class="btn btn-success" (click)="createOrder()">+</button>
+    </div>
+    <table class="table table-striped" *ngIf="!createMode; else create">
+        <thead>
+            <tr>
+                <th><b>#</b></th>
+                <th><b>Date</b></th>
+                <th><b>Status</b></th>
+                <th><b>Customer</b></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let order of orders">
+                <td>
+                    <i>
+                        <a [routerLink]="['/orders', order.id]">
+                            {{order.orderNumber}}
+                        </a>
+                    </i>
+                </td>
+                <td>{{order.date}}</td>
+                <td>{{order.orderStatus}}</td>
+                <td>{{order.customer.name}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<ng-template #create>
+    <div class="container">
+        <h2>New order</h2>
+        <hr />
+
+        <div class="form-group">
+            <h6>Customer</h6>
+            <select class="form-control" [(ngModel)]="order.customer">
+                <option *ngFor="let customer of customers" [ngValue]="customer">{{customer.name}}</option>
+            </select>
+        </div>
+
+        <hr />
+        <h4>Order Lines</h4>
+       
+        <div class="form-group" *ngFor="let orderLine of order.orderLines">
+
+            <hr />
+
+            <div class="float-right">
+                <button class="btn btn-sm btn-warning" (click)="removeOrderLine(orderLine)">Remove</button>
+            </div>
+
+            <div class="form-inline">
+                <select class="form-control-sm" [(ngModel)]="orderLine.product">
+                    <option *ngFor="let product of products" [ngValue]="product">{{product.name}}</option>
+                </select>
+
+                <input class="form-control-sm" type="number" min="1" [(ngModel)]="orderLine.quantity" />
+
+                <div>
+                    <b>Total: </b>
+                    <i>{{orderLine.product.price * orderLine.quantity}}</i>
+                </div>
+            </div>
+
+        </div>
+
+        <hr />
+
+        <div class="form-group float-right">
+            <button class="btn btn-sm btn-primary" (click)="addOrderLine()">Add order line</button>
+        </div>
+
+        <hr />
+
+        <div class="form-group">
+            <b>Total: </b>
+            <i>{{calculateTotal()}}</i>
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-success" (click)="submit()">Create</button>
+            <button class="btn btn-warning" (click)="cancel()">Cancel</button>
+        </div>
+    </div>
+</ng-template>
