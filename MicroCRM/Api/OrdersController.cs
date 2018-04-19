@@ -4,37 +4,22 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MicroCRM.Auth;
 using MicroCRM.Data;
 using MicroCRM.Entities;
 using MicroCRM.Models.Customers;
 using MicroCRM.Models.Orders;
 using MicroCRM.Models.OrderLines;
 using MicroCRM.Models.Products;
-using MicroCRM.Sessions;
 
 namespace MicroCRM.Api
 {
     [Authorize]
-    [Produces("application/json")]
-    [Route("/api/[controller]")]
-    public class OrdersController : Controller
+    public class OrdersController : RestController
     {
-        #region Private members
-
-        private DataContext _dataContext;
-        private ISessionManager _sessionManager;
-
-        #endregion
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="dataContext">The database context.</param>
-        /// <param name="sessionManager">The session manager.</param>
-        public OrdersController(DataContext dataContext, ISessionManager sessionManager)
+        public OrdersController(AuthContext authContext, DataContext dataContext)
+            : base(authContext, dataContext)
         {
-            _dataContext = dataContext;
-            _sessionManager = sessionManager;
         }
 
         #region Actions
@@ -51,7 +36,7 @@ namespace MicroCRM.Api
                 {
                     Id = or.Id,
                     Date = or.CreatedAt.ToString(Defaults.DateFormat),
-                    OrderStatus = or.OrderStatus.ToString(),
+                    OrderStatus = or.OrderStatus.ToString().ToLowerInvariant(),
                     OrderNumber = or.OrderNumber.ToString(Defaults.OrderNumberFormat),
                     Customer = new CustomerViewModel
                     {
@@ -83,7 +68,7 @@ namespace MicroCRM.Api
             {
                 Id = order.Id,
                 Date = order.UpdatedAt.ToString(Defaults.DateFormat),
-                OrderStatus = order.OrderStatus.ToString(),
+                OrderStatus = order.OrderStatus.ToString().ToLowerInvariant(),
                 OrderNumber = order.OrderNumber.ToString(Defaults.OrderNumberFormat),
                 Customer = new CustomerViewModel
                 {
@@ -117,8 +102,8 @@ namespace MicroCRM.Api
                 OrderStatus = OrderStatus.Created,
                 OrderNumber = _dataContext.Orders.Count() + 1,
                 CustomerId = vm.Customer.Id ?? throw new ArgumentNullException(nameof(vm.Customer.Id)),
-                CreatedById = _sessionManager.CurrentUser.Id,
-                UpdatedById = _sessionManager.CurrentUser.Id,
+                CreatedById = _authContext.CurrentUser.Id,
+                UpdatedById = _authContext.CurrentUser.Id,
             };
 
             var lines = vm.OrderLines.Select(ol => new OrderLine
@@ -126,8 +111,8 @@ namespace MicroCRM.Api
                 OrderId = order.Id,
                 Quantity = ol.Quantity,
                 ProductId = ol.Product.Id ?? throw new ArgumentNullException(nameof(ol.Product.Id)),
-                CreatedById = _sessionManager.CurrentUser.Id,
-                UpdatedById = _sessionManager.CurrentUser.Id
+                CreatedById = _authContext.CurrentUser.Id,
+                UpdatedById = _authContext.CurrentUser.Id
             });
 
             await _dataContext.Orders.AddAsync(order).ConfigureAwait(false);
@@ -146,9 +131,9 @@ namespace MicroCRM.Api
                 return NotFound();
             }
 
-            order.OrderStatus = Enum.Parse<OrderStatus>(vm.OrderStatus);
+            order.OrderStatus = Enum.Parse<OrderStatus>(vm.OrderStatus, ignoreCase: true);
             order.UpdatedAt = DateTime.UtcNow;
-            order.UpdatedById = _sessionManager.CurrentUser.Id;
+            order.UpdatedById = _authContext.CurrentUser.Id;
 
             _dataContext.Orders.Update(order);
             await _dataContext.SaveChangesAsync().ConfigureAwait(false);

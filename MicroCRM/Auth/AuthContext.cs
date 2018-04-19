@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 using MicroCRM.Data;
 using MicroCRM.Entities;
+using Microsoft.AspNetCore.Http;
 
-namespace MicroCRM.Sessions
+namespace MicroCRM.Auth
 {
-    public class SessionManager : ISessionManager
+    public class AuthContext
     {
         #region Private members
 
@@ -17,11 +17,6 @@ namespace MicroCRM.Sessions
         #endregion
 
         #region Public properties
-
-        /// <summary>
-        /// Gets the is authenticated flag.
-        /// </summary>
-        public bool IsAuthenticated => _httpContext.User.Identity.IsAuthenticated;
 
         /// <summary>
         /// Gets the current user.
@@ -52,7 +47,7 @@ namespace MicroCRM.Sessions
         /// </summary>
         /// <param name="dataContext">The database context.</param>
         /// <param name="httpContextAccessor">The HTTP context accessor.</param>
-        public SessionManager(DataContext dataContext, IHttpContextAccessor httpContextAccessor)
+        public AuthContext(DataContext dataContext, IHttpContextAccessor httpContextAccessor)
         {
             _dataContext = dataContext;
             _httpContext = httpContextAccessor.HttpContext;

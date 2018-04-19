@@ -15,9 +15,9 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using MicroCRM.Data;
 using MicroCRM.Services.Encryption;
-using MicroCRM.Sessions;
 using MicroCRM.Services.Random;
 using MicroCRM.Extensions;
+using MicroCRM.Auth;
 
 namespace MicroCRM
 {
@@ -97,9 +97,9 @@ namespace MicroCRM
                 mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
             });
 
-            serviceCollection.AddTransient<IEncryptionService, EncryptionService>(sp => new EncryptionService());
-            serviceCollection.AddTransient<IRangomService, RandomService>(sp => new RandomService());
-            serviceCollection.AddTransient<ISessionManager, SessionManager>(sp => new SessionManager(sp.GetService<DataContext>(), sp.GetService<IHttpContextAccessor>()));
+            serviceCollection.AddTransient<IEncryptionService, EncryptionService>();
+            serviceCollection.AddTransient<IRangomService, RandomService>();
+            serviceCollection.AddTransient<AuthContext>();
         }
 
         /// <summary>

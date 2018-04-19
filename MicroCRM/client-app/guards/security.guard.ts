@@ -14,6 +14,6 @@ export class SecurityGuard implements CanActivate {
     }
 
     public canActivate(): boolean {
-        return localStorage.getItem("role") == "Admin";
+        return localStorage.getItem("role").toLowerCase() == "admin";
     }
 }

@@ -43,10 +43,11 @@ module.exports = {
             }
         ]
     },
+    devtool: "source-map",
     plugins: [
         new webpack.ProvidePlugin({ $: "jquery", jQuery: "jquery", Popper: "popper.js" }),
         new webpack.ContextReplacementPlugin(/angular(\\|\/)core/, "./client-app", {}),
         new webpack.optimize.CommonsChunkPlugin({ name: ["app", "polyfills", "bootstrap"] }),
-        new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin({ sourceMap: true })
     ]
 };

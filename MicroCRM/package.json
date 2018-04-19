@@ -3,35 +3,35 @@
     "private": true,
     "version": "0.0.0",
     "dependencies": {
-        "@angular/common": "^5.2.0",
-        "@angular/compiler": "^5.2.0",
-        "@angular/core": "^5.2.0",
-        "@angular/forms": "^5.2.0",
-        "@angular/platform-browser": "^5.2.0",
-        "@angular/platform-browser-dynamic": "^5.2.0",
-        "@angular/router": "^5.2.0",
+        "@angular/common": "^5.2.10",
+        "@angular/compiler": "^5.2.10",
+        "@angular/core": "^5.2.10",
+        "@angular/forms": "^5.2.10",
+        "@angular/platform-browser": "^5.2.10",
+        "@angular/platform-browser-dynamic": "^5.2.10",
+        "@angular/router": "^5.2.10",
         
-        "core-js": "^2.5.3",
-        "zone.js": "^0.8.19",
-        "rxjs": "^5.5.6",
+        "core-js": "^2.5.5",
+        "zone.js": "^0.8.26",
+        "rxjs": "^5.5.10",
 
         "jquery": "^3.3.1",
-        "popper.js": "^1.12.9",
-        "bootstrap": "^4.0.0"
+        "popper.js": "^1.14.3",
+        "bootstrap": "^4.1.0"
     },
     "devDependencies": {
-        "@types/node": "^9.3.0",
-        "@types/webpack-env": "^1.13.3",
-        "typescript": "^2.6.2",
+        "@types/node": "^9.6.5",
+        "@types/webpack-env": "^1.13.6",
+        "typescript": "^2.8.1",
         "webpack": "^3.10.0",
-        "webpack-hot-middleware": "^2.21.0",
+        "webpack-hot-middleware": "^2.21.1",
         "ts-loader": "^3.2.0",
         "angular2-template-loader": "^0.6.2",
         "to-string-loader": "^1.1.5",
-        "style-loader": "^0.19.1",
-        "css-loader": "^0.28.8",
-        "html-loader": "^0.5.4",
+        "style-loader": "^0.20.3",
+        "css-loader": "^0.28.11",
+        "html-loader": "^0.5.5",
         "aspnet-prerendering": "^3.0.1",
-        "aspnet-webpack": "^2.0.1"
+        "aspnet-webpack": "^2.0.3"
     }
 }

@@ -23,11 +23,11 @@ export class AuthService {
         return localStorage.getItem("access_token") != null;
     }
 
-    public generateAuthorizationHeaders(): { "Authorization": string } {
-        return { "Authorization": "Bearer " + localStorage.getItem("access_token") };
-    }
+    // public generateAuthorizationHeaders(): { "Authorization": string } {
+    //     return { "Authorization": "Bearer " + localStorage.getItem("access_token") };
+    // }
 
-    public isAdmin(): boolean { return localStorage.getItem("role") == "Admin"; }
-    public isOwner(): boolean { return localStorage.getItem("role") == "Owner"; }
-    public isSales(): boolean { return localStorage.getItem("role") == "Sales"; }
+    public isAdmin(): boolean { return localStorage.getItem("role").toLowerCase() == "admin"; }
+    public isOwner(): boolean { return localStorage.getItem("role").toLowerCase() == "owner"; }
+    public isSales(): boolean { return localStorage.getItem("role").toLowerCase() == "sales"; }
 }

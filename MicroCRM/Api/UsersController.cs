@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MicroCRM.Auth;
 using MicroCRM.Data;
 using MicroCRM.Entities;
 using MicroCRM.Models.Users;
@@ -12,27 +13,18 @@ using MicroCRM.Services.Random;
 namespace MicroCRM.Api
 {
     [Authorize(Roles = nameof(Role.Admin))]
-    [Produces("application/json")]
-    [Route("/api/[controller]")]
-    public class UsersController : Controller
+    public class UsersController : RestController
     {
         #region Prvate members
 
-        private readonly DataContext _dataContext;
         private readonly IEncryptionService _encryptionService;
         private readonly IRangomService _randomService;
         
         #endregion
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="dataContext">The database context.</param>
-        /// <param name="encryptionService">The encryption service.</param>
-        /// <param name="randomService">The random service.</param>
-        public UsersController(DataContext dataContext, IEncryptionService encryptionService, IRangomService randomService)
+        public UsersController(AuthContext authContext, DataContext dataContext, IEncryptionService encryptionService, IRangomService randomService)
+            : base(authContext, dataContext)
         {
-            _dataContext = dataContext;
             _encryptionService = encryptionService;
             _randomService = randomService;
         }
@@ -59,26 +51,26 @@ namespace MicroCRM.Api
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] UserViewModel vm)
         {
-            var username = vm.Username.EndsWith(Defaults.Domain) ? vm.Username : $"{vm.Username}@{Defaults.Domain}";
             var user = _dataContext.Users.FirstOrDefault(us => us.Username == vm.Username);
             if (user != null)
             {
                 return Forbid();
             }
 
-            var randomPassword = _randomService.GenerateRandomString(8);
+            var username = vm.Username.EndsWith(Defaults.Domain) ? vm.Username : $"{vm.Username}@{Defaults.Domain}";
+            var password = _randomService.GenerateRandomString(8);
 
             user = new User
             {
                 Username = username,
-                Password = _encryptionService.ComputeHexString(randomPassword),
+                Password = _encryptionService.ComputeHexString(password),
                 Role = Enum.Parse<Role>(vm.Role, ignoreCase: true)
             };
 
             await _dataContext.Users.AddAsync(user).ConfigureAwait(false);
             await _dataContext.SaveChangesAsync().ConfigureAwait(false);
 
-            return Ok(new { @username = user.Username, @password = randomPassword });
+            return Ok(new { username, password });
         }
 
         #endregion

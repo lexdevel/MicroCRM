@@ -5,31 +5,24 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using MicroCRM.Auth;
 using MicroCRM.Data;
 using MicroCRM.Models.Token;
 using MicroCRM.Services.Encryption;
 
 namespace MicroCRM.Api
 {
-    [Produces("application/json")]
-    [Route("/api/[controller]")]
-    public class TokenController : Controller
+    public class TokenController : RestController
     {
         #region Private members
 
-        private readonly DataContext _dataContext;
         private readonly IEncryptionService _encryptionService;
 
         #endregion
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="dataContext">The database context.</param>
-        /// <param name="encryptionService">The encryption service.</param>
-        public TokenController(DataContext dataContext, IEncryptionService encryptionService)
+        public TokenController(AuthContext authContext, DataContext dataContext, IEncryptionService encryptionService)
+            : base(authContext, dataContext)
         {
-            _dataContext = dataContext;
             _encryptionService = encryptionService;
         }
 
@@ -63,7 +56,7 @@ namespace MicroCRM.Api
             var response = new TokenViewModel
             {
                 AccessToken = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken),
-                Role = user.Role.ToString()
+                Role = user.Role.ToString().ToLowerInvariant()
             };
 
             return Ok(response);

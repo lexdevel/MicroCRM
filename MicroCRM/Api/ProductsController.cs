@@ -3,34 +3,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MicroCRM.Auth;
 using MicroCRM.Data;
 using MicroCRM.Entities;
 using MicroCRM.Models.Products;
-using MicroCRM.Sessions;
 
 namespace MicroCRM.Api
 {
     [Authorize]
-    [Produces("application/json")]
-    [Route("/api/[controller]")]
-    public class ProductsController : Controller
+    public class ProductsController : RestController
     {
-        #region Private members
-
-        private readonly DataContext _dataContext;
-        private readonly ISessionManager _sessionManager;
-
-        #endregion
-
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="dataContext">The database context.</param>
-        /// <param name="sessionManager">The session manager.</param>
-        public ProductsController(DataContext dataContext, ISessionManager sessionManager)
+        public ProductsController(AuthContext authContext, DataContext dataContext)
+            : base(authContext, dataContext)
         {
-            _dataContext = dataContext;
-            _sessionManager = sessionManager;
         }
 
         #region Actions
