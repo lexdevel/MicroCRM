@@ -3,7 +3,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.Webpack;
@@ -13,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using MicroCRM.Auth;
 using MicroCRM.Data;
+using MicroCRM.Extensions;
 using MicroCRM.Services.Encryption;
 using MicroCRM.Services.Random;
-using MicroCRM.Extensions;
-using MicroCRM.Auth;
 
 namespace MicroCRM
 {
@@ -63,17 +62,8 @@ namespace MicroCRM
         /// <param name="serviceCollection">The service collection.</param>
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            if (Environment != Environment.Development)
-            {
-                serviceCollection.Configure<MvcOptions>(mvcOptions =>
-                {
-                    mvcOptions.CacheProfiles.Add("Default", new CacheProfile { Duration = Defaults.ResponseCacheDurationSeconds });
-                    mvcOptions.Filters.Add(new ResponseCacheAttribute { CacheProfileName = "Default" });
-                    mvcOptions.Filters.Add(new RequireHttpsAttribute { Permanent = true });
-                });
-            }
-
-            serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            serviceCollection
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(jwtBearerOptions =>
                 {
                     jwtBearerOptions.RequireHttpsMetadata = !Environment.IsDevelopment();
@@ -90,16 +80,35 @@ namespace MicroCRM
                         ValidateLifetime = true
                     };
                 });
-            serviceCollection.AddDbContext<DataContext>(dbContextOptionsBilder => dbContextOptionsBilder.UseInMemoryDatabase("MicroCRM"));
-            serviceCollection.AddMvc().AddJsonOptions(mvcJsonOptions =>
-            {
-                mvcJsonOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-            });
 
+            serviceCollection
+                .AddDbContext<DataContext>(dbContextOptionsBilder =>
+                {
+                    dbContextOptionsBilder.UseInMemoryDatabase("MicroCRM");
+                    dbContextOptionsBilder.EnableSensitiveDataLogging(Environment.IsDevelopment());
+                });
+
+            serviceCollection.AddMvc()
+                .AddJsonOptions(mvcJsonOptions =>
+                {
+                    mvcJsonOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                })
+                .AddMvcOptions(mvcOptions =>
+                {
+                    mvcOptions.Filters.Add(new GlobalExceptionHandler(Environment));
+
+                    if (Environment.IsStaging() || Environment.IsProduction())
+                    {
+                        mvcOptions.CacheProfiles.Add("Default", new CacheProfile { Duration = Defaults.ResponseCacheDurationSeconds });
+                        mvcOptions.Filters.Add(new ResponseCacheAttribute { CacheProfileName = "Default" });
+                        mvcOptions.Filters.Add(new RequireHttpsAttribute { Permanent = true });
+                    }
+                });
+
+            serviceCollection.AddSingleton<AuthContext>();
             serviceCollection.AddTransient<IEncryptionService, EncryptionService>();
             serviceCollection.AddTransient<IRangomService, RandomService>();
-            serviceCollection.AddTransient<AuthContext>();
         }
 
         /// <summary>
