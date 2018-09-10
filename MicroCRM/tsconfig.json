@@ -1,27 +1,15 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "es2015",
-        "moduleResolution": "node",
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "sourceMap": true,
-        "allowJs": false,
-        "noImplicitAny": true,
-        "typeRoots": [
-            "node_modules/@types/",
-            "webpack-env"
-        ],
-        "lib": [
-            "es2015",
-            "dom"
-        ]
-    },
-    "exclude": [
-        "node_modules",
-        "wwwroot",
-        "bin",
-        "obj"
+  "compilerOptions": {
+    "target": "es2015",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": [
+      "es2017",
+      "dom"
     ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

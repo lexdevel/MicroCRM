@@ -3,9 +3,10 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
-using Microsoft.AspNetCore.SpaServices.Webpack;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,28 +31,17 @@ namespace MicroCRM
         /// <summary>
         /// Gets the configuration.
         /// </summary>
-        public IConfigurationRoot Configuration { get; }
-
-        /// <summary>
-        /// Gets the environment.
-        /// </summary>
-        public Environment Environment { get; }
+        public IConfiguration Configuration { get; }
 
         #endregion
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="hostingEnvironment">The hosting environment.</param>
-        public Startup(IHostingEnvironment hostingEnvironment)
+        /// <param name="configuration">The configuration.</param>
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
-            var configurationBuilder = new ConfigurationBuilder()
-                .AddApplicationInsightsSettings(developerMode: hostingEnvironment.IsDevelopment())
-                .SetBasePath(hostingEnvironment.ContentRootPath)
-                .AddEnvironmentVariables();
-
-            Configuration = configurationBuilder.Build();
-            Environment = Environment.TryParse(hostingEnvironment.EnvironmentName) ?? Environment.Development;
+            Configuration = configuration;
         }
 
         #region Configuration methods
@@ -66,7 +56,7 @@ namespace MicroCRM
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(jwtBearerOptions =>
                 {
-                    jwtBearerOptions.RequireHttpsMetadata = !Environment.IsDevelopment();
+                    jwtBearerOptions.RequireHttpsMetadata = false;
                     jwtBearerOptions.SaveToken = true;
                     jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -85,7 +75,7 @@ namespace MicroCRM
                 .AddDbContext<DataContext>(dbContextOptionsBilder =>
                 {
                     dbContextOptionsBilder.UseInMemoryDatabase("MicroCRM");
-                    dbContextOptionsBilder.EnableSensitiveDataLogging(Environment.IsDevelopment());
+                    dbContextOptionsBilder.EnableSensitiveDataLogging(true);
                 });
 
             serviceCollection.AddMvc()
@@ -93,20 +83,15 @@ namespace MicroCRM
                 {
                     mvcJsonOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                })
-                .AddMvcOptions(mvcOptions =>
-                {
-                    mvcOptions.Filters.Add(new GlobalExceptionHandler(Environment));
-
-                    if (Environment.IsStaging() || Environment.IsProduction())
-                    {
-                        mvcOptions.CacheProfiles.Add("Default", new CacheProfile { Duration = Defaults.ResponseCacheDurationSeconds });
-                        mvcOptions.Filters.Add(new ResponseCacheAttribute { CacheProfileName = "Default" });
-                        mvcOptions.Filters.Add(new RequireHttpsAttribute { Permanent = true });
-                    }
                 });
 
+            serviceCollection.AddSpaStaticFiles(spaStaticFilesOptions =>
+            {
+                spaStaticFilesOptions.RootPath = "WebApp/dist";
+            });
+
             serviceCollection.AddSingleton<AuthContext>();
+            serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             serviceCollection.AddTransient<IEncryptionService, EncryptionService>();
             serviceCollection.AddTransient<IRangomService, RandomService>();
         }
@@ -116,37 +101,23 @@ namespace MicroCRM
         /// </summary>
         /// <param name="applicationBuilder">The application builder.</param>
         /// <param name="hostingEnvironment">The hosting environment.</param>
-        /// <param name="loggerFactory">The logger factory.</param>
-        public void Configure(IApplicationBuilder applicationBuilder, IHostingEnvironment hostingEnvironment, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder applicationBuilder, IHostingEnvironment hostingEnvironment)
         {
-            if (Environment.IsDevelopment())
+            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
-                loggerFactory.AddConsole();
-                loggerFactory.AddDebug();
-
-                // applicationBuilder.UseDatabaseErrorPage();
-                // applicationBuilder.UseDeveloperExceptionPage();
-                applicationBuilder.UseBrowserLink();
-                applicationBuilder.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions { HotModuleReplacement = true });
-
-                using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
-                {
-                    var dataCotext = serviceScope.ServiceProvider.GetService<DataContext>();
-                    var encryptionService = serviceScope.ServiceProvider.GetService<IEncryptionService>();
-                    DemoDataSnapshot.CreateDemoData(dataCotext, encryptionService);
-                }
+                var dataCotext = serviceScope.ServiceProvider.GetService<DataContext>();
+                var encryptionService = serviceScope.ServiceProvider.GetService<IEncryptionService>();
+                DemoDataSnapshot.CreateDemoData(dataCotext, encryptionService);
             }
-            else
-            {
-                applicationBuilder.UseRewriter(new RewriteOptions().AddRedirectToHttpsPermanent());
-                applicationBuilder.UseResponseCaching();
-                applicationBuilder.UseResponseCompression();
-            }
-            
+
             applicationBuilder.UseAuthentication();
-            applicationBuilder.UseDefaultFiles();
-            applicationBuilder.UseStaticFiles();
+            applicationBuilder.UseSpaStaticFiles();
             applicationBuilder.UseMvc();
+            applicationBuilder.UseSpa(spaBuilder =>
+            {
+                spaBuilder.Options.SourcePath = "WebApp";
+                spaBuilder.UseAngularCliServer(npmScript: "start");
+            });
         }
 
         #endregion
