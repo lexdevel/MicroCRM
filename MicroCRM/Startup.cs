@@ -83,15 +83,16 @@ namespace MicroCRM
                 {
                     mvcJsonOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                });
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             serviceCollection.AddSpaStaticFiles(spaStaticFilesOptions =>
             {
                 spaStaticFilesOptions.RootPath = "WebApp/dist";
             });
 
-            serviceCollection.AddSingleton<AuthContext>();
-            serviceCollection.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            serviceCollection.AddTransient<AuthContext>();
+            serviceCollection.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             serviceCollection.AddTransient<IEncryptionService, EncryptionService>();
             serviceCollection.AddTransient<IRangomService, RandomService>();
         }

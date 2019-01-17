@@ -13,7 +13,7 @@ namespace MicroCRM.Entities.Abstract
         /// <summary>
         /// Gets or sets the unique identifier.
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        /// [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>

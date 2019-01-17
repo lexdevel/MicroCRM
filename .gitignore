@@ -9,3 +9,4 @@ node_modules
 *.bundle.js
 *.DS_Store
 package-lock.json
+launchSettings.json
