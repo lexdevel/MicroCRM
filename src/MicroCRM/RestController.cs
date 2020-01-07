@@ -11,6 +11,7 @@ namespace MicroCRM
         #region Protected members
 
         protected readonly AuthContext _authContext;
+
         protected readonly DataContext _dataContext;
 
         #endregion

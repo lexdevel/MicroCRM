@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MicroCRM.Entities.Abstract
 {
@@ -13,7 +12,6 @@ namespace MicroCRM.Entities.Abstract
         /// <summary>
         /// Gets or sets the unique identifier.
         /// </summary>
-        /// [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>

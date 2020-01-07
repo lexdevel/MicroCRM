@@ -4,18 +4,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using MicroCRM.Auth;
 using MicroCRM.Data;
-using MicroCRM.Extensions;
 using MicroCRM.Services.Encryption;
 using MicroCRM.Services.Random;
 
@@ -39,7 +34,7 @@ namespace MicroCRM
         /// Constructor.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -78,18 +73,12 @@ namespace MicroCRM
                     dbContextOptionsBilder.EnableSensitiveDataLogging(true);
                 });
 
-            serviceCollection.AddMvc()
-                .AddJsonOptions(mvcJsonOptions =>
-                {
-                    mvcJsonOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                    mvcJsonOptions.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            serviceCollection
+                .AddControllers()
+                .AddNewtonsoftJson();
 
-            serviceCollection.AddSpaStaticFiles(spaStaticFilesOptions =>
-            {
-                spaStaticFilesOptions.RootPath = "WebApp/dist";
-            });
+            serviceCollection
+                .AddSpaStaticFiles(spaStaticFilesOptions => spaStaticFilesOptions.RootPath = "WebApp/dist");
 
             serviceCollection.AddTransient<AuthContext>();
             serviceCollection.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
@@ -101,8 +90,8 @@ namespace MicroCRM
         /// Configures the web application.
         /// </summary>
         /// <param name="applicationBuilder">The application builder.</param>
-        /// <param name="hostingEnvironment">The hosting environment.</param>
-        public void Configure(IApplicationBuilder applicationBuilder, IHostingEnvironment hostingEnvironment)
+        /// <param name="wenHostEnvironment">The webhost environment.</param>
+        public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment webHostEnvironment)
         {
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
@@ -111,9 +100,13 @@ namespace MicroCRM
                 DemoDataSnapshot.CreateDemoData(dataCotext, encryptionService);
             }
 
-            applicationBuilder.UseAuthentication();
+            applicationBuilder.UseDefaultFiles();
+            applicationBuilder.UseStaticFiles();
             applicationBuilder.UseSpaStaticFiles();
-            applicationBuilder.UseMvc();
+            applicationBuilder.UseRouting();
+            applicationBuilder.UseAuthentication();
+            applicationBuilder.UseAuthorization();
+            applicationBuilder.UseEndpoints(endpointRouteBuilder => endpointRouteBuilder.MapControllers());
             applicationBuilder.UseSpa(spaBuilder =>
             {
                 spaBuilder.Options.SourcePath = "WebApp";

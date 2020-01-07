@@ -12,6 +12,7 @@ namespace MicroCRM.Auth
         #region Private members
 
         private readonly DataContext _dataContext;
+
         private readonly HttpContext _httpContext;
 
         #endregion

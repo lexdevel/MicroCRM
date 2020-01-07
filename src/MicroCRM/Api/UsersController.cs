@@ -18,8 +18,9 @@ namespace MicroCRM.Api
         #region Prvate members
 
         private readonly IEncryptionService _encryptionService;
+
         private readonly IRangomService _randomService;
-        
+
         #endregion
 
         public UsersController(AuthContext authContext, DataContext dataContext, IEncryptionService encryptionService, IRangomService randomService)
