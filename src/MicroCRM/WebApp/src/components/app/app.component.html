@@ -13,6 +13,9 @@
       <li class="nav-item" *ngIf="authService.isAdmin()">
         <a class="nav-link" routerLink="users">Users</a>
       </li>
+      <li class="nav-item">
+        <span class="nav-link" [(click)]="logOff()">Sign out</span>
+      </li>
     </ul>
   </div>
 </nav>

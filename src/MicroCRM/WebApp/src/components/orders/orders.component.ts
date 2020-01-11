@@ -2,8 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { OrderService } from "./../../services/order.service";
 import { CustomerService } from "./../../services/customer.service";
 import { ProductService } from "./../../services/product.service";
-import { Order } from "./../../models/order";
-import { OrderLine } from "./../../models/order-line";
+import { OrderLine, Order } from "./../../models/order";
 import { Customer } from "./../../models/customer";
 import { Product } from "./../../models/product";
 

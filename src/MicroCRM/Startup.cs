@@ -90,7 +90,7 @@ namespace MicroCRM
         /// Configures the web application.
         /// </summary>
         /// <param name="applicationBuilder">The application builder.</param>
-        /// <param name="wenHostEnvironment">The webhost environment.</param>
+        /// <param name="webHostEnvironment">The webhost environment.</param>
         public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment webHostEnvironment)
         {
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
