@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using MicroCRM.Auth;
 using MicroCRM.Data;
@@ -21,6 +22,12 @@ namespace MicroCRM
     /// </summary>
     internal class Startup
     {
+        #region Private members
+
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        #endregion
+
         #region Public properties
 
         /// <summary>
@@ -34,9 +41,11 @@ namespace MicroCRM
         /// Constructor.
         /// </summary>
         /// <param name="configuration">The configuration.</param>
-        public Startup(IConfiguration configuration)
+        /// <param name="webHostEnvironment">The web host environment.</param>
+        public Startup(IConfiguration configuration, IWebHostEnvironment webHostEnvironment)
         {
             Configuration = configuration;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         #region Configuration methods
@@ -69,13 +78,17 @@ namespace MicroCRM
             serviceCollection
                 .AddDbContext<DataContext>(dbContextOptionsBilder =>
                 {
-                    dbContextOptionsBilder.UseInMemoryDatabase("MicroCRM");
-                    dbContextOptionsBilder.EnableSensitiveDataLogging(true);
+                    dbContextOptionsBilder.UseNpgsql(Configuration["DB_CONNECTION_STRING"]);
+                    dbContextOptionsBilder.EnableSensitiveDataLogging(_webHostEnvironment.IsDevelopment() || _webHostEnvironment.IsStaging());
                 });
 
             serviceCollection
                 .AddControllers()
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson(mvcNewtonsoftJsonOptions =>
+                {
+                    mvcNewtonsoftJsonOptions.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                    mvcNewtonsoftJsonOptions.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
 
             serviceCollection
                 .AddSpaStaticFiles(spaStaticFilesOptions => spaStaticFilesOptions.RootPath = "WebApp/dist");
@@ -93,25 +106,27 @@ namespace MicroCRM
         /// <param name="webHostEnvironment">The webhost environment.</param>
         public void Configure(IApplicationBuilder applicationBuilder, IWebHostEnvironment webHostEnvironment)
         {
-            using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
-            {
-                var dataCotext = serviceScope.ServiceProvider.GetService<DataContext>();
-                var encryptionService = serviceScope.ServiceProvider.GetService<IEncryptionService>();
-                DemoDataSnapshot.CreateDemoData(dataCotext, encryptionService);
-            }
-
             applicationBuilder.UseDefaultFiles();
             applicationBuilder.UseStaticFiles();
-            applicationBuilder.UseSpaStaticFiles();
+
+            if (webHostEnvironment.IsDevelopment())
+            {
+                applicationBuilder.UseSpaStaticFiles();
+            }
+
             applicationBuilder.UseRouting();
             applicationBuilder.UseAuthentication();
             applicationBuilder.UseAuthorization();
             applicationBuilder.UseEndpoints(endpointRouteBuilder => endpointRouteBuilder.MapControllers());
-            applicationBuilder.UseSpa(spaBuilder =>
+
+            if (webHostEnvironment.IsDevelopment())
             {
-                spaBuilder.Options.SourcePath = "WebApp";
-                spaBuilder.UseAngularCliServer(npmScript: "start");
-            });
+                applicationBuilder.UseSpa(spaBuilder =>
+                {
+                    spaBuilder.Options.SourcePath = "WebApp";
+                    spaBuilder.UseAngularCliServer(npmScript: "start");
+                });
+            }
         }
 
         #endregion
