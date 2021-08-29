@@ -13,16 +13,24 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  app:
+  backend:
     build:
       context: .
-      dockerfile: ./src/MicroCRM/Dockerfile
-      args:
-        BUILD_TYPE: Release
+      dockerfile: ./src/backend/MicroCRM/Dockerfile
     depends_on:
       - db
     environment:
       ASPNETCORE_ENVIRONMENT: Staging
       DB_CONNECTION_STRING: Server=db;Port=5432;User ID=postgres;Password=root;Database=MicroCRMDB;
     ports:
-      - "5000:80"
+      - '5000:80'
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./src/frontend/Dockerfile
+    depends_on:
+      - db
+      - backend
+    ports:
+      - '4200:4200'

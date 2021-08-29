@@ -8,5 +8,3 @@ node_modules
 *.csproj.user
 *.bundle.js
 *.DS_Store
-package-lock.json
-launchSettings.json

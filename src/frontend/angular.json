@@ -1,0 +1,44 @@
+{
+  "cli": {
+    "analytics": "bde14fa5-1652-4609-9906-7e1fb2a058ca"
+  },
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "app": {
+      "root": "",
+      "projectType": "application",
+      "sourceRoot": "src",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist",
+            "index": "index.html",
+            "main": "src/main.ts",
+            "polyfills": "src/polyfills.ts",
+            "tsConfig": "tsconfig.json",
+            "assets": [
+              "src/assets"
+            ],
+            "scripts": [
+              "node_modules/jquery/dist/jquery.js",
+              "node_modules/popper.js/dist/popper.js",
+              "node_modules/bootstrap/dist/js/bootstrap.js"
+            ],
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.css"
+            ]
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "app:build"
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "app"
+}
